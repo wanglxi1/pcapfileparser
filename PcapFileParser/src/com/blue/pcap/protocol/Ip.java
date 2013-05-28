@@ -96,5 +96,4 @@ public class Ip {
 	public IpAddress getDestination() {
 		return destination;
 	}
-
 }

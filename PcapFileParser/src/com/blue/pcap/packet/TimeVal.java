@@ -7,7 +7,7 @@ import java.util.Date;
 import org.apache.mina.core.buffer.IoBuffer;
 
 public class TimeVal {
-	public final static DateFormat DF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	public final static DateFormat DF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 	
 	long sec; /* seconds (XXX should be time_t) */
 	long usec; /* and microseconds */
@@ -21,6 +21,6 @@ public class TimeVal {
 
 	@Override
 	public String toString() {
-		return DF.format(new Date(sec*1000))+"."+usec;
+		return DF.format(new Date(sec*1000 + usec/1000));
 	}
 }

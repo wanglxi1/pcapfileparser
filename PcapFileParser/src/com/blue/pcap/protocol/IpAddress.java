@@ -22,7 +22,7 @@ public class IpAddress {
 	public String toString() {
 		String[] s = new String[bs.length];
 		for(int i=0,ilen=bs.length; i<ilen; i++) {
-			s[i] = String.valueOf(bs[i]);
+			s[i] = String.valueOf(bs[i] & 0xFF);
 		}
 		return StringUtil.join(s, ".");
 	}

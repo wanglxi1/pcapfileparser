@@ -42,12 +42,16 @@ public class PcapFileParser {
 		
 		filterChain.init();
 		
-		PcapFileHeader header = PcapFileHeader.valueOf(buf);
-		System.out.println(header);
+		PcapFileHeader.valueOf(buf);
+		
+		long i = 1;
 		
 		while(buf.hasRemaining()){
 			Packet p = Packet.valueOf(buf);
+			p.setIndex(i++);
+			filterChain.start();
 			filterChain.filter(null, p);
+			filterChain.end();
 		}
 		
 		filterChain.finish();
@@ -57,10 +61,17 @@ public class PcapFileParser {
 		private Iterator<PacketFilter> iterator = null;
 		@Override
 		public void init() {
+			for(PacketFilter f: filters){
+				f.init();
+			}
+		}
+		
+		@Override
+		public void start() {
 			iterator = filters.iterator();
 			
 			for(PacketFilter f: filters){
-				f.init();
+				f.start();
 			}
 		}
 
@@ -71,6 +82,13 @@ public class PcapFileParser {
 			}
 		}
 		
+		@Override
+		public void end() {
+			for(PacketFilter f: filters){
+				f.end();
+			}
+		}
+
 		@Override
 		public void finish() {
 			iterator = null;

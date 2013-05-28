@@ -22,7 +22,7 @@ public class Mac {
 		for(byte b: bs) {
 			s += Integer.toHexString(b & 0xFF) + ":";
 		}
-		s.substring(0, s.length()-1);
+		s.substring(0, s.length()-2);
 		return s;
 	}
 }

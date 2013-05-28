@@ -6,9 +6,14 @@ import org.apache.mina.core.buffer.IoBuffer;
 
 public class PacketHeader {
 	TimeVal ts; 	/* time stamp */
-	int caplen; 	/* length of portion present */
-	int len; 		/* length this packet (off wire) */
+	int caplen; 	/* length of portion present 实际捕获的长度（当前分组的长度）*/
+	int len; 		/* length this packet (off wire) 包长度（完整的未分组前） */
 	
+	/**
+	 * 实际捕获的长度
+	 * 
+	 * @return
+	 */
 	public int getCaplen() {
 		return caplen;
 	}
@@ -26,7 +31,7 @@ public class PacketHeader {
 
 	@Override
 	public String toString() {
-		return ts + " -> " + len + "["+caplen+"]";
+		return ts + " = " + len + "["+caplen+"]";
 	}
 	
 }

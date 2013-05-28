@@ -1,14 +1,16 @@
 package com.blue.pcap.packet;
 
+import java.text.MessageFormat;
+
 import org.apache.mina.core.buffer.IoBuffer;
 
 import com.blue.pcap.protocol.Ethernet;
 import com.blue.pcap.protocol.Ip;
 import com.blue.pcap.protocol.Tcp;
+import com.blue.pcap.util.StringUtil;
 
 public class Packet {
-	public static long PRE_SEQUENCENUMBER = -1;
-	
+	long index;
 	PacketHeader header;
 	Ethernet ethernet;
 	Ip ip;
@@ -25,14 +27,14 @@ public class Packet {
 		p.tcp = Tcp.valueOf(buf);
 		
 		int dataLen = p.ip.getTotalLen() - p.ip.getHeaderLen() - p.tcp.getHeaderLen();
-		if(dataLen > 0) {//只读取有数据的
-			if(PRE_SEQUENCENUMBER==-1 || p.tcp.getSequenceNumber()!=PRE_SEQUENCENUMBER) { //过滤重复包
-				PRE_SEQUENCENUMBER = p.tcp.getSequenceNumber();
-				p.data = new byte[dataLen];
-				buf.get(p.data);
-			}else {
-				buf.skip(dataLen);
-			}
+		p.data = new byte[dataLen];
+		buf.get(p.data);
+		
+		int remain = p.header.getCaplen() - Ethernet.LENGTH - p.ip.getTotalLen();
+		if(remain > 0) {
+			byte[] bs = new byte[remain];
+			buf.get(bs);
+			p.ethernet.setPadding(bs);
 		}
 		
 		return p; 
@@ -58,8 +60,25 @@ public class Packet {
 		return data;
 	}
 
+	public long getIndex() {
+		return index;
+	}
+
+	public void setIndex(long index) {
+		this.index = index;
+	}
+
 	@Override
 	public String toString() {
-		return header + " - " + ethernet + " - " + ip + " - " + tcp + "\n" + data;
+		return MessageFormat.format("[{0}] S={2}:{3} D={4}:{5} ({1}) {6} \n{7}\n", 
+				String.valueOf(index),
+				String.valueOf(data.length),
+				ip.getSource(),
+				String.valueOf(tcp.getSourcePort()),
+				ip.getDestination(),
+				String.valueOf(tcp.getDestinationPort()),
+				header,
+				StringUtil.byte2HexString(data)
+			);
 	}
 }

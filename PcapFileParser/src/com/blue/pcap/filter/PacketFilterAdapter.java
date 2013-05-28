@@ -14,4 +14,12 @@ public class PacketFilterAdapter implements PacketFilter {
 	@Override
 	public void finish() {	}
 
+	@Override
+	public void start() {	}
+
+	@Override
+	public void end() {	}
+	
+	
+
 }

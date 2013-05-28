@@ -13,15 +13,16 @@ public class ParserTest extends TestCase {
 
 	@Test
 	public void test() throws Exception {
+		
 		PcapFileParser pfp = new PcapFileParser();
 		pfp.addFilter(new PacketFilterAdapter() {
 			@Override
 			public void filter(PacketFilter filter, Packet p) {
-				System.out.println(p);
+				System.out.println(p + "\n");
 			}
 		});
 		
-		pfp.parser(new File("G:\\Download\\金山快盘\\资料\\_Research\\alchemy\\lhsg\\socket\\KEY.pcap"));
+		pfp.parser(new File("E:\\Download\\金山快盘\\资料\\_Research\\alchemy\\lhsg\\socket\\KEY.pcap"));
 	}
 
 }
