@@ -4,6 +4,8 @@ import java.nio.ByteOrder;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
+import com.blue.pcap.protocol.part.TcpFlags;
+
 
 /**
  * Transmission Control Protocol, Src Port: paycash-wbp (8129), Dst Port: gpsd (2947), Seq: 0, Ack: 1, Len: 0
@@ -11,7 +13,7 @@ import org.apache.mina.core.buffer.IoBuffer;
  * @author BluE
  *
  */
-public class Tcp {
+public class TCP implements Protocol {
 	int sourcePort;
 	int destinationPort;
 	long sequenceNumber;
@@ -23,10 +25,11 @@ public class Tcp {
 	
 	byte[] options;
 	
-	public static Tcp valueOf(IoBuffer buf) {
+	@Override
+	public void valueOf(IoBuffer buf) {
 		buf.order(ByteOrder.BIG_ENDIAN);
 		
-		Tcp i = new Tcp();
+		TCP i = this;
 		
 		i.sourcePort = buf.getUnsignedShort();
 		i.destinationPort = buf.getUnsignedShort();
@@ -34,7 +37,7 @@ public class Tcp {
 		i.acknowledgementNumber = buf.getUnsignedInt();
 		
 		i.flags = TcpFlags.valueOf(buf);
-		i.headerLen = i.flags.headerLen * 4;
+		i.headerLen = i.flags.getHeaderLen() * 4;
 		
 		i.windowSize = buf.getUnsignedShort();
 		i.checksum = buf.getUnsignedShort();
@@ -45,8 +48,6 @@ public class Tcp {
 		if(i.options.length > 0) {
 			buf.get(i.options);
 		}
-		
-		return i;
 	}
 
 	public int getSourcePort() {
@@ -65,6 +66,7 @@ public class Tcp {
 		return acknowledgementNumber;
 	}
 
+	@Override
 	public int getHeaderLen() {
 		return headerLen;
 	}

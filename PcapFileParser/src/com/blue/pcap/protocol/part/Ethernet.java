@@ -1,4 +1,4 @@
-package com.blue.pcap.protocol;
+package com.blue.pcap.protocol.part;
 
 import java.nio.ByteOrder;
 import java.text.MessageFormat;

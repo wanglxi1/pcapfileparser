@@ -4,29 +4,45 @@ import java.text.MessageFormat;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import com.blue.pcap.protocol.Ethernet;
-import com.blue.pcap.protocol.Ip;
-import com.blue.pcap.protocol.Tcp;
+import com.blue.pcap.protocol.IP;
+import com.blue.pcap.protocol.IP.ProtocolEnum;
+import com.blue.pcap.protocol.part.Ethernet;
+import com.blue.pcap.protocol.Protocol;
+import com.blue.pcap.protocol.TCP;
 import com.blue.pcap.util.StringUtil;
 
 public class Packet {
 	long index;
 	PacketHeader header;
 	Ethernet ethernet;
-	Ip ip;
-	Tcp tcp;
+	IP ip;
+	Protocol protocol;
 	byte[] data;
 	
 	public static Packet valueOf(IoBuffer buf) {
 		Packet p = new Packet();
 		
 		p.header = PacketHeader.valueOf(buf);
-		
 		p.ethernet = Ethernet.valueOf(buf);
-		p.ip = Ip.valueOf(buf);
-		p.tcp = Tcp.valueOf(buf);
+		p.ip = IP.valueOf(buf);
 		
-		int dataLen = p.ip.getTotalLen() - p.ip.getHeaderLen() - p.tcp.getHeaderLen();
+		int protocolHeaderLen = 0;
+		ProtocolEnum protocol = p.ip.getProtocol();
+		if(protocol != null) {
+			Class clz = null;
+			try {
+				clz = Class.forName("com.blue.pcap.protocol."+protocol.name());
+				
+				if(clz != null) {
+					Protocol proc = (Protocol) clz.newInstance();
+					proc.valueOf(buf);
+					protocolHeaderLen = proc.getHeaderLen();
+					p.protocol = proc;
+				}
+			}catch(Exception e) {}
+		}
+		
+		int dataLen = p.ip.getTotalLen() - p.ip.getHeaderLen() - protocolHeaderLen;
 		p.data = new byte[dataLen];
 		buf.get(p.data);
 		
@@ -48,12 +64,12 @@ public class Packet {
 		return ethernet;
 	}
 
-	public Ip getIp() {
+	public IP getIp() {
 		return ip;
 	}
 
-	public Tcp getTcp() {
-		return tcp;
+	public Protocol getProtocol() {
+		return protocol;
 	}
 
 	public byte[] getData() {
@@ -74,9 +90,9 @@ public class Packet {
 				String.valueOf(index),
 				String.valueOf(data.length),
 				ip.getSource(),
-				String.valueOf(tcp.getSourcePort()),
+				(protocol instanceof TCP)? String.valueOf(((TCP)protocol).getSourcePort()): "",
 				ip.getDestination(),
-				String.valueOf(tcp.getDestinationPort()),
+				(protocol instanceof TCP)? String.valueOf(((TCP)protocol).getDestinationPort()): "",
 				header,
 				StringUtil.byte2HexString(data)
 			);
